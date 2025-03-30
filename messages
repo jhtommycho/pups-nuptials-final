@@ -1,0 +1,65 @@
+{/* Communication Section */}
+                    <div className="bg-white rounded-lg shadow-lg p-6">
+                      <div className="flex items-center mb-6">
+                        <MessageSquare className="w-6 h-6 text-gold mr-2" />
+                        <h2 className="text-2xl font-semibold text-navy">
+                          Communication
+                        </h2>
+                      </div>
+
+                      {/* Messages */}
+                      <ScrollArea className="rounded-md border">
+                        <div className="space-y-6 mb-6">
+                          {comments.map((comment) => (
+                            <div
+                              key={comment.id}
+                              className={`flex ${
+                                comment.author === "Client"
+                                  ? "justify-end"
+                                  : "justify-start"
+                              }`}
+                            >
+                              <div
+                                className={`max-w-[80%] rounded-lg p-4 ${
+                                  comment.author === "Client"
+                                    ? "bg-navy text-cream"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-medium">
+                                    {comment.author}
+                                  </span>
+                                  <span className="text-sm opacity-75">
+                                    {format(comment.timestamp, "h:mm a")}
+                                  </span>
+                                </div>
+                                <p>{comment.content}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <ScrollBar orientation="vertical" />
+                      </ScrollArea>
+
+                      {/* New Message Form */}
+                      <form
+                        onSubmit={handleSubmitComment}
+                        className="flex gap-2"
+                      >
+                        <input
+                          type="text"
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Type your message..."
+                          className="flex-1 rounded-lg border-2 border-gray-200 p-2 focus:outline-none focus:border-gold"
+                        />
+                        <button
+                          type="submit"
+                          className="bg-gold text-navy px-4 py-2 rounded-lg hover:bg-gold/90 transition-colors flex items-center"
+                        >
+                          <Send className="w-5 h-5" />
+                        </button>
+                      </form>
+                    </div>
+                  </div>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+
 import { format } from "date-fns";
 import {
   MessageSquare,
@@ -13,6 +14,7 @@ import {
   ArrowDownIcon,
   Check,
   Pencil,
+  Package,
 } from "lucide-react";
 import {
   createComment,
@@ -80,6 +82,7 @@ function InquiryCard({
   const [isEditingService, setIsEditingService] = useState<
     Record<string, boolean>
   >({});
+
   const [editFormData, setEditFormData] = useState<Record<string, any>>({});
   const [isUpdatingService, setIsUpdatingService] = useState(false);
 
@@ -140,7 +143,8 @@ function InquiryCard({
         dogCount: inq.dogCount.toString(),
         weddingDate: inq.weddingDate,
         serviceLength: inq.serviceLength,
-        weddingLocation: inq.weddingLocation,
+        weddingCity: inq.weddingCity,
+        weddingAddress: inq.weddingAddress,
         houseSitting: inq.houseSitting,
         houseSittingLocation: inq.houseSittingLocation || "",
       },
@@ -189,7 +193,7 @@ function InquiryCard({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      {user?.userRole === "CLIENT" ? (
+                      {user?.userRole === "client" ? (
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-cream text-navy">
                           {inq.status === "pending" && (
                             <div className="text-yellow-500">PENDING</div>
@@ -316,7 +320,7 @@ function InquiryCard({
                                   Service Details
                                 </h2>
 
-                                {user?.userRole === "MANAGER" && (
+                                {user?.userRole === "manager" && (
                                   <Dialog
                                     open={isEditingService[inq.id]}
                                     onOpenChange={(open) => {
@@ -419,23 +423,44 @@ function InquiryCard({
                                             }
                                           />
                                         </div>
-
                                         <div className="space-y-2">
-                                          <Label htmlFor="weddingLocation">
-                                            Wedding Location
+                                          <Label htmlFor="weddingCity">
+                                            Wedding City
                                           </Label>
                                           <Input
-                                            id="weddingLocation"
+                                            id="weddingCity"
                                             value={
                                               editFormData[inq.id]
-                                                ?.weddingLocation || ""
+                                                ?.weddingCity || ""
                                             }
                                             onChange={(e) =>
                                               setEditFormData((prev) => ({
                                                 ...prev,
                                                 [inq.id]: {
                                                   ...prev[inq.id],
-                                                  weddingLocation:
+                                                  weddingCity: e.target.value,
+                                                },
+                                              }))
+                                            }
+                                          />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                          <Label htmlFor="weddingAddress">
+                                            Wedding Address
+                                          </Label>
+                                          <Input
+                                            id="weddingAddress"
+                                            value={
+                                              editFormData[inq.id]
+                                                ?.weddingAddress || ""
+                                            }
+                                            onChange={(e) =>
+                                              setEditFormData((prev) => ({
+                                                ...prev,
+                                                [inq.id]: {
+                                                  ...prev[inq.id],
+                                                  weddingAddress:
                                                     e.target.value,
                                                 },
                                               }))
@@ -588,10 +613,13 @@ function InquiryCard({
                                   <MapPin className="w-6 h-6 text-gold flex-shrink-0 mt-1" />
                                   <div>
                                     <h3 className="font-medium text-navy">
-                                      Wedding Location
+                                      Wedding Address / Venue
                                     </h3>
                                     <p className="text-gray-600">
-                                      {inq.weddingLocation}
+                                      {inq.weddingAddress}
+                                    </p>
+                                    <p className="text-gray-600">
+                                      {inq.weddingCity}
                                     </p>
                                   </div>
                                 </div>
@@ -622,12 +650,37 @@ function InquiryCard({
                                   </div>
                                 )}
 
+                                {inq.servicePackage ? (
+                                  <div className="flex items-start space-x-4">
+                                    <Package className="w-6 h-6 text-gold flex-shrink-0 mt-1" />
+                                    <div>
+                                      <h3 className="font-medium text-navy">
+                                        Service Package of Interest
+                                      </h3>
+                                      <p className="text-gray-600">
+                                        {inq.servicePackage}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-start space-x-4">
+                                    <Home className="w-6 h-6 text-gold flex-shrink-0 mt-1" />
+                                    <div>
+                                      <h3 className="font-medium text-navy">
+                                        Service Package of Interest
+                                      </h3>
+                                      <h2 className="text-gray-600">{""}</h2>
+                                    </div>
+                                  </div>
+                                )}
+
                                 {/* Last Updated At */}
                                 {isAuthorized && (
                                   <div className="border-t pt-6">
                                     <h3 className="font-sm text-gray-500 mb-2">
                                       Service Details Last Updated At:{" "}
-                                      {format(inq.updatedAt, "MMMM d, yyyy")}
+                                      {format(inq.updatedAt, "MMMM d, yyyy")} -
+                                      currently 1 day behind
                                     </h3>
                                   </div>
                                 )}
@@ -649,7 +702,7 @@ function InquiryCard({
                               <h2 className="text-xl font-semibold text-navy mb-6">
                                 <span>
                                   Status Updates{" "}
-                                  {user?.userRole === "MANAGER" && (
+                                  {user?.userRole === "manager" && (
                                     <Popover
                                       open={statusOpen}
                                       onOpenChange={setStatusOpen}
@@ -1001,7 +1054,7 @@ function InquiryCard({
 
                           {/* New Message Form */}
                           <form
-                            onSubmit={(e) => {
+                            onSubmit={async (e) => {
                               e.preventDefault();
                               const input = e.currentTarget.elements.namedItem(
                                 "content"
@@ -1009,6 +1062,26 @@ function InquiryCard({
                               if (input.value.trim()) {
                                 handleCommentSubmit(inq.id, input.value);
                               }
+
+                              await fetch("/api/emails", {
+                                method: "POST",
+                                headers: {
+                                  "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                  email: inq?.user?.email,
+                                  firstName: inq?.user?.name,
+                                  action: "comment",
+                                  content: input.value,
+                                }),
+                              })
+                                .then((res) => res.json())
+                                .then((data) =>
+                                  console.log("Response from API:", data)
+                                )
+                                .catch((error) =>
+                                  console.error("Error sending email:", error)
+                                );
                             }}
                             className="flex gap-2"
                           >

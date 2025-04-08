@@ -31,7 +31,6 @@ const DashboardCalendar = ({
       inq,
     },
   }));
-  console.log(calendarEvents);
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md border border-rose-100">

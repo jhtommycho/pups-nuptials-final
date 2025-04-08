@@ -15,7 +15,7 @@ type user = users[number];
 
 const InquiryList = ({ inquiry, user }: { inquiry: inquiry; user: user }) => {
   // Only show the notification bell for managers
-  const isManager = user?.userRole === "MANAGER";
+  const isManager = user?.userRole === "manager";
 
   return (
     <>
@@ -57,11 +57,11 @@ const InquiryList = ({ inquiry, user }: { inquiry: inquiry; user: user }) => {
                         </span>
                         <span className="text-gray-500 text-sm">
                           Last Response By:{" "}
-                          {inq.Comment?.[0]?.user?.userRole === "MANAGER"
+                          {inq.Comment?.[0]?.user?.userRole === "manager"
                             ? "Manager"
-                            : inq.Comment?.[0]?.user?.userRole === "CLIENT"
-                            ? "Client"
-                            : "No Comments Yet"}{" "}
+                            : inq.Comment?.[0]?.user?.userRole === "client"
+                              ? "Client"
+                              : "No Comments Yet"}{" "}
                           {inq.Comment?.[0]?.createdAt
                             ? format(
                                 inq.Comment?.[0]?.createdAt,

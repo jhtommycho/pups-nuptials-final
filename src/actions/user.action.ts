@@ -70,6 +70,7 @@ export async function getUser(){
       where: {
         id: userId,
       },
+      
     });
 
     return user;

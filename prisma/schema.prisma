@@ -18,7 +18,7 @@ model User {
   email     String       @unique
   username  String       @unique
   clerkId   String       @unique
-  userRole  userRoleType @default(CLIENT)
+  userRole  userRoleType @default(client)
   name      String?
   image     String?
   location  String?
@@ -34,8 +34,8 @@ model User {
 }
 
 enum userRoleType {
-  MANAGER
-  CLIENT
+  manager
+  client
 }
 
 model Service {
@@ -48,6 +48,7 @@ model Service {
   groomName            String
   weddingDate          String
   serviceLength        String
+  servicePackage       String?
   houseSitting         Boolean       @default(false)
   weddingCity          String
   weddingAddress       String
@@ -137,4 +138,54 @@ model Notification {
 enum NotificationType {
   NEW_REQUEST
   NEW_COMMENT
+}
+
+model Header {
+  id    String @id @default(cuid())
+  title String
+  image String
+}
+
+model Discovery {
+  id          String @id @default(cuid())
+  year        String
+  title       String
+  description String
+  achievement String
+  image       String
+}
+
+model Feature {
+  id          String @id @default(cuid())
+  title       String
+  description String
+  image       String
+}
+
+model Testimonials {
+  id          String @id @default(cuid())
+  client      String
+  description String
+  image       String
+}
+
+model Package {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  price       Int
+  favorite    Boolean @default(false)
+
+  // Relations
+  PackageFeatures PackageFeatures[]
+}
+
+model PackageFeatures {
+  id        String @id @default(cuid())
+  content   String
+  packageId String
+
+  // Relations
+
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
 }

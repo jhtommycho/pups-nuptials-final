@@ -20,7 +20,7 @@ async function AnalyticsPage() {
   const allRequests = await getRequest();
 
   // Redirect or show access denied if not a manager
-  if (user?.userRole !== "MANAGER") {
+  if (user?.userRole !== "manager") {
     return (
       <div className="flex items-center justify-center h-full">
         <Card className="w-full max-w-md">

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getDbUserId, getUserByClerkId } from "./user.action";
 import { revalidatePath } from "next/cache"
 import { createNotification } from "./notification.action";
-import { marketingType, serviceStage, ServiceStatus } from "@prisma/client";
+import { marketingType, serviceStage, ServiceStatus, userRoleType } from "@prisma/client";
 
 
 export async function createRequest(
@@ -19,11 +19,10 @@ export async function createRequest(
   houseSittingLocation: string,
   content: string,
   dogs: { dogName: string, dogAge: string, dogBreed: string, dogWeight?:string }[],
+  servicePackage?: string,
 ) {
   const userId = await getDbUserId();
   if (!userId) return;
-
-  
 
   try {
     const create = await prisma.service.create({
@@ -48,7 +47,8 @@ export async function createRequest(
             dogBreed: dog.dogBreed,
             dogWeight: dog.dogWeight
           }))
-        }
+        },
+        servicePackage,
       }
     });
     
@@ -67,7 +67,7 @@ export async function createRequest(
   }
 }
 
-export async function getRequest(status?: ServiceStatus,location?:string) { 
+export async function getRequest(status?: ServiceStatus,location?:string, role?:userRoleType) { 
   try {
     const userId = await getDbUserId();
     if (!userId) return;
@@ -87,11 +87,24 @@ export async function getRequest(status?: ServiceStatus,location?:string) {
           orderBy: {
             createdAt: 'desc',
           },
+          take: 1
         },
       },
     });
     
-    return inquiry;
+    
+
+  const filteredInquiries = inquiry.filter(service => {
+      if (service.Comment.length > 0) {
+        const lastComment = service.Comment[0];
+        // Check if a role filter is provided and if the last comment's user role matches the specified role
+        return role ? lastComment.user.userRole === role : true;
+      }
+      // If there's no comment, include the service if no role filter is set
+      return role ? false : true;
+    });
+    
+    return filteredInquiries
 }
 catch (error){
   console.log(error)
@@ -277,8 +290,24 @@ export async function updateServiceDetails(id:string, dogCount?: number, wedding
         weddingAddress
       }
     })
+    revalidatePath('/')
     return update
   } catch (error) {
     
   }
+}
+
+export async function getFeature(){
+  return await prisma.feature.findMany({
+  })
+
+}
+
+export async function getTestimonials(){
+  return await prisma.testimonials.findMany({
+    orderBy: {
+      id: "desc"
+    }
+  })
+  
 }

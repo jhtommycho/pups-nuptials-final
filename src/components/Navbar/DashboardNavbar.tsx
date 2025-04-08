@@ -13,6 +13,7 @@ const DashboardNavbar = () => {
     { name: "Calendar", path: "/dashboard/calendar" },
     { name: "Analytics", path: "/dashboard/analytics" },
     { name: "Notifications", path: "/dashboard/notifications" },
+    { name: "Settings", path: "/dashboard/settings" },
     { name: "Home", path: "/landing" },
   ];
 

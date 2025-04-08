@@ -35,7 +35,7 @@ const HeroSection = () => {
         </div>
         {isSignedIn ? (
           <Link href="/myinquiry/request">
-            <Button className="hover:bg-gray-600 rounded-xl">
+            <Button className="hover:bg-gray-600  rounded-xl">
               Inquire Pups & Nuptials
             </Button>
           </Link>

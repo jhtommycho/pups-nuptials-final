@@ -22,7 +22,7 @@ const LastAction = () => {
         {isSignedIn ? (
           <Link href="/myinquiry/request">
             <Button className="hover:cursor-pointer  bg-gold text-navy px-8 py-4 rounded-full text-lg font-semibold hover:bg-gold/90 transition-colors flex items-center mx-auto">
-              Schedule Your Consultation
+              Inquire Pups & Nuptials Today!
               <ChevronRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>

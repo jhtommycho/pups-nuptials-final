@@ -43,7 +43,7 @@ export async function getUnreadNotificationsManager() {
     });
     
     // Only fetch notifications for managers
-    if (user?.userRole !== 'MANAGER') return;
+    if (user?.userRole !== 'manager') return;
     
     const notifications = await prisma.notification.findMany({
       where: {

@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import { getFeature } from "@/actions/service.action";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 50 },
@@ -21,7 +22,9 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-const FeaturedSection = () => {
+type featureCards = Awaited<ReturnType<typeof getFeature>>;
+type featureCard = featureCards[number];
+const FeaturedSection = ({ featureCards }: featureCard) => {
   return (
     <motion.div
       initial="hidden"
@@ -38,28 +41,21 @@ const FeaturedSection = () => {
           Your Pups Big Day! Placeholder
         </motion.h2>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-16 lg:gap-16 xl:gap-16">
-          {[0, 1, 2].map((index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <FeatureCard
-                imageSrc={`/landing-search${3 - index}.png`}
-                title={
-                  [
-                    "Professional Care",
-                    "Luxury Experience",
-                    "Seamless Integration",
-                  ][index]
-                }
-                description={
-                  [
-                    "Expert handlers ensuring your furry babies are perfectly prepared and comfortable",
-                    "placeholder",
-                    "Perfect coordination with your wedding timeline and photography sessions",
-                  ][index]
-                }
-                linkText={["Explore", "Search", "Discover"][index]}
-                linkHref={["/explore", "/search", "/discover"][index]}
-              />
-            </motion.div>
+          {featureCards.map((card) => (
+            <div
+              key={card.id}
+              className="flex flex-col items-center text-center"
+            >
+              <div className="w-full h-60 relative mb-4">
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="object-cover rounded-md"
+                />
+              </div>
+              <h3 className="text-lg font-semibold mb-1">{card.title}</h3>
+              <p className="text-sm text-gray-700">{card.description}</p>
+            </div>
           ))}
         </div>
       </div>

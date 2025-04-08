@@ -2,25 +2,29 @@ import { getRequest } from "@/actions/service.action";
 import { getUser } from "@/actions/user.action";
 import InquiryFilter from "@/components/Inquiry/InquiryFilter";
 import InquiryList from "@/components/Inquiry/InquiryList";
-import { ServiceStatus } from "@prisma/client";
+import { ServiceStatus, userRoleType } from "@prisma/client";
 import React from "react";
 
 async function page({
   searchParams,
 }: {
-  searchParams: { inquiryStatus: ServiceStatus; city: string };
+  searchParams: {
+    inquiryStatus: ServiceStatus;
+    city: string;
+    responder: userRoleType;
+  };
 }) {
   const inquiryStatus = searchParams.inquiryStatus;
   const city = searchParams.city;
-  console.log(inquiryStatus);
+  const responder = searchParams.responder;
 
   const user = await getUser();
-  const inquiries = await getRequest(inquiryStatus, city);
+  const inquiries = await getRequest(inquiryStatus, city, responder);
   const allInquiries = await getRequest();
 
   return (
     <div className="w-full">
-      <div className="flex border border-gray-500">
+      <div className="flex ">
         <InquiryFilter inquiries={allInquiries} />
         {/* Last Message By Filter */}
       </div>

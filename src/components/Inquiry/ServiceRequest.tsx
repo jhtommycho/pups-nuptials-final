@@ -8,21 +8,24 @@ import {
   FaInstagram,
   FaTiktok,
 } from "react-icons/fa";
-import {
-  Dog,
-  Calendar,
-  Clock,
-  MapPin,
-  Home as HomeIcon,
-  Plus,
-  Trash,
-} from "lucide-react";
+import { Dog, MapPin, Home as HomeIcon, Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createRequest } from "@/actions/service.action";
 import toast from "react-hot-toast";
 import { getUser } from "@/actions/user.action";
 import { marketingType } from "@prisma/client";
 import { cities } from "../../../public/constants/cities";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 
 interface Doggy {
   id: string;
@@ -45,16 +48,16 @@ interface ServiceRequestForm {
   houseSittingLocation: string;
   content: string;
   dogs: Doggy[];
+  servicePackage: string;
 }
 
 type users = Awaited<ReturnType<typeof getUser>>;
 type user = users[number];
 
 function ServiceRequest({ user }: { user: user }) {
-  // const [query, setQuery] = useState("");
-  // const [filteredCities, setFilteredCities] = useState(cities);
-  // const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+
+  const [servicePackage, setServicePackage] = useState("");
 
   const {
     register,
@@ -73,27 +76,6 @@ function ServiceRequest({ user }: { user: user }) {
   const { fields, append, remove } = useFieldArray({ name: "dogs", control });
   const houseSitting = watch("houseSitting");
 
-  // const handleFocus = () => {
-  //   setIsOpen(true);
-  // };
-
-  // const handleCitySelect = (city: string) => {
-  //   setQuery(city);
-  //   setValue("weddingCity", city);
-  //   setIsOpen(false);
-  // };
-
-  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const inputQuery = e.target.value;
-  //   setQuery(inputQuery);
-  //   setValue("weddingCity", inputQuery);
-
-  //   const filtered = cities.filter((city) =>
-  //     city.toLowerCase().includes(inputQuery.toLowerCase())
-  //   );
-  //   setFilteredCities(filtered);
-  // };
-
   const onSubmit = async (data: ServiceRequestForm) => {
     try {
       await createRequest(
@@ -108,15 +90,32 @@ function ServiceRequest({ user }: { user: user }) {
         data.weddingAddress,
         data.houseSittingLocation,
         data.content,
-        data.dogs
+        data.dogs,
+        servicePackage
       );
+
+      await fetch("/api/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user?.email,
+          firstName: user?.name,
+          action: "inquirySubmission",
+          content: null,
+          dogName: data.dogs,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => console.log("Response from API:", data))
+        .catch((error) => console.error("Error sending email:", error));
       toast.success("Inquiry submitted successfully!", {
         position: "top-right",
       });
       setTimeout(() => {
         router.push(`/myinquiry/${user.username}`);
       }, 1000);
-      console.log(data.weddingCity);
     } catch (error) {
       console.log(error);
       toast.error("Failed to submit inquiry");
@@ -151,36 +150,40 @@ function ServiceRequest({ user }: { user: user }) {
               </div>
 
               {fields.map((field, index) => (
-                <div key={field.id} className="grid md:grid-cols-5 gap-4 mb-4">
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="text-red-500 border w-5"
-                  >
-                    <Trash className="w-5 h-5" />
-                  </button>
+                <div
+                  key={field.id}
+                  className="grid md:grid-cols-5 gap-4 mb-4 items-center"
+                >
                   <input
                     {...register(`dogs.${index}.dogName`)}
-                    placeholder="Dog Name"
+                    placeholder="Name"
                     className="w-full px-4 py-2 border rounded-lg"
                   />
                   <input
                     {...register(`dogs.${index}.dogAge`)}
-                    placeholder="Dog Age"
+                    placeholder="Age"
                     className="w-full px-4 py-2 border rounded-lg"
                   />
                   <input
                     {...register(`dogs.${index}.dogBreed`)}
-                    placeholder="Dog Breed"
+                    placeholder="Breed"
                     className="w-full px-4 py-2 border rounded-lg"
                   />
                   <input
                     {...register(`dogs.${index}.dogWeight`)}
-                    placeholder="Dog Weight (lbs)"
+                    placeholder="Weight (lbs)"
                     className="w-full px-4 py-2 border rounded-lg"
                   />
+                  <button
+                    type="button"
+                    onClick={() => remove(index)}
+                    className="flex justify-center items-center text-red-500 hover:text-white hover:bg-red-500 border border-red-500 transition-colors rounded-lg p-2"
+                  >
+                    <Trash className="w-5 h-5" />
+                  </button>
                 </div>
               ))}
+
               <button
                 type="button"
                 onClick={() =>
@@ -192,7 +195,7 @@ function ServiceRequest({ user }: { user: user }) {
                     dogWeight: "",
                   })
                 }
-                className="flex items-center text-blue-600"
+                className="flex items-center text-blue-600 mt-2 hover:underline"
               >
                 <Plus className="w-5 h-5 mr-2" /> Add Dog
               </button>
@@ -204,15 +207,27 @@ function ServiceRequest({ user }: { user: user }) {
                 Couple Information
               </h2>
               <input
-                {...register("brideName", { required: true })}
+                {...register("brideName", {
+                  required: true,
+                })}
                 placeholder="Bride's Name"
                 className="w-full px-4 py-2 border rounded-lg mb-4"
               />
+              {errors.brideName?.type === "required" && (
+                <p role="alert" className="text-red-400">
+                  Please enter bride's name
+                </p>
+              )}
               <input
                 {...register("groomName", { required: true })}
                 placeholder="Groom's Name"
                 className="w-full px-4 py-2 border rounded-lg"
               />
+              {errors.groomName?.type === "required" && (
+                <p role="alert" className="text-red-400">
+                  Please enter groom's name
+                </p>
+              )}
             </div>
 
             {/* Wedding Details Section */}
@@ -223,7 +238,6 @@ function ServiceRequest({ user }: { user: user }) {
               <input
                 {...register("weddingDate", { required: true })}
                 type="date"
-                className="w-full px-4 py-2 border rounded-lg mb-4"
               />
               <input
                 {...register("serviceLength", { required: true })}
@@ -268,6 +282,43 @@ function ServiceRequest({ user }: { user: user }) {
                   className="w-full px-4 py-2 border rounded-lg"
                 />
               )}
+            </div>
+
+            {/* Interested Service Package */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold text-navy mb-6">
+                Package of Interest
+              </h2>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    {servicePackage || "Select a Package"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuItem
+                    onClick={() => setServicePackage("Paws of Honour")}
+                    textValue="Paws of Honour"
+                  >
+                    Paws of Honour
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setServicePackage("All Paws In")}
+                  >
+                    All Paws In
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setServicePackage("Royal Treatment")}
+                  >
+                    Royal Treatment
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setServicePackage("Pet Boarding")}
+                  >
+                    Pet Boarding
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Additional Information Section */}
